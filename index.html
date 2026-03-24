@@ -3,185 +3,401 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EBOM - Gerador de Esboço Bíblico</title>
+  <title>EBOM 2026 - Gerador de Esboço Bíblico</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root{
-      --bg:#f4f7fb;
-      --card:#ffffff;
-      --text:#17202a;
-      --muted:#6b7280;
-      --primary:#1d4ed8;
-      --primary-hover:#1e40af;
-      --border:#dbe3ef;
-      --success:#15803d;
-      --shadow:0 14px 40px rgba(15,23,42,.08);
-      --radius:18px;
+      --bg:#020617;
+      --bg-soft:#071226;
+      --card:rgba(8,18,38,.88);
+      --card-strong:rgba(6,14,28,.94);
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --primary:#22c55e;
+      --primary-hover:#16a34a;
+      --primary-dark:#052e16;
+      --secondary:#0ea5e9;
+      --border:rgba(148,163,184,.18);
+      --border-strong:rgba(34,197,94,.28);
+      --success:#22c55e;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --glow:0 0 25px rgba(34,197,94,.18);
+      --radius:22px;
     }
+
     *{box-sizing:border-box}
+
+    html,body{min-height:100%}
+
     body{
       margin:0;
       font-family:Arial, Helvetica, sans-serif;
-      background:linear-gradient(180deg,#eef4ff 0%, var(--bg) 100%);
       color:var(--text);
+      background:
+        linear-gradient(rgba(2,6,23,.82), rgba(2,6,23,.9)),
+        url("ESCOLA BÍBLICA DE OBREIROS CRISTÃO (5).png") center top / cover no-repeat fixed;
+      position:relative;
     }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(circle at 50% 10%, rgba(14,165,233,.18), transparent 30%),
+        radial-gradient(circle at 50% 20%, rgba(34,197,94,.12), transparent 35%),
+        linear-gradient(180deg, rgba(2,6,23,.25), rgba(2,6,23,.68));
+      pointer-events:none;
+      z-index:0;
+    }
+
     .wrap{
-      width:min(980px, 94%);
-      margin:32px auto;
+      width:min(1080px, 94%);
+      margin:28px auto 34px;
+      position:relative;
+      z-index:1;
     }
+
     .hero{
       text-align:center;
-      margin-bottom:24px;
+      margin-bottom:22px;
+      padding:26px 18px 18px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      background:linear-gradient(180deg, rgba(8,18,38,.72), rgba(8,18,38,.42));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(7px);
     }
- .hero h1{
-  margin:0 0 10px;
-  font-size:clamp(30px, 5vw, 48px);
-  color:#1e3a8a;
-  line-height:1.2;
-  font-weight:800;
-}
-    .hero p{
+
+    .eyebrow{
+      display:inline-block;
+      letter-spacing:2px;
+      font-size:13px;
+      color:#dbeafe;
+      text-transform:uppercase;
+      margin-bottom:10px;
+      opacity:.95;
+    }
+
+    .hero h1{
       margin:0;
-      color:var(--muted);
-      font-size:17px;
+      font-size:clamp(34px, 5vw, 62px);
+      line-height:1.06;
+      color:#4ade80;
+      font-weight:800;
+      text-shadow:
+        0 0 12px rgba(34,197,94,.22),
+        0 0 28px rgba(14,165,233,.14);
+    }
+
+    .hero .sub{
+      margin:12px auto 0;
+      max-width:720px;
+      color:#e2e8f0;
+      font-size:19px;
       line-height:1.5;
     }
-  .card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  padding:24px;
-  margin-bottom:18px;
-}
+
+    .hero .steps{
+      margin:18px auto 0;
+      display:inline-flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .step{
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      color:#dbeafe;
+      font-size:14px;
+    }
+
+    .grid-banner{
+      margin:20px auto 0;
+      max-width:880px;
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:12px;
+    }
+
+    .mini-card{
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:14px;
+      color:#e2e8f0;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .mini-card strong{
+      display:block;
+      color:#4ade80;
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin-bottom:18px;
+      backdrop-filter:blur(8px);
+    }
+
+    .card-title{
+      margin:0 0 16px;
+      font-size:20px;
+      color:#f8fafc;
+    }
+
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:16px;
     }
-    @media (max-width: 760px){
-      .grid{grid-template-columns:1fr}
+
+    @media (max-width: 860px){
+      .grid,
+      .grid-banner{
+        grid-template-columns:1fr;
+      }
+
+      .hero{
+        padding:22px 14px 16px;
+      }
+
+      .hero .sub{
+        font-size:17px;
+      }
     }
+
     label{
       display:block;
       font-weight:700;
       margin-bottom:8px;
       font-size:14px;
+      color:#f8fafc;
     }
+
     input[type="text"], textarea{
       width:100%;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:14px 15px;
+      border:1px solid rgba(148,163,184,.22);
+      border-radius:16px;
+      padding:15px 16px;
       font-size:15px;
       outline:none;
-      background:#fff;
+      color:#f8fafc;
+      background:rgba(255,255,255,.04);
+      transition:.2s ease;
     }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder{
+      color:#94a3b8;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus{
+      border-color:rgba(34,197,94,.45);
+      box-shadow:0 0 0 4px rgba(34,197,94,.12);
+    }
+
     textarea{
       min-height:220px;
       resize:vertical;
-      line-height:1.5;
+      line-height:1.6;
     }
+
+    .upload-box{
+      border:1px dashed rgba(148,163,184,.28);
+      border-radius:18px;
+      padding:16px;
+      background:rgba(255,255,255,.03);
+    }
+
     input[type="file"]{
       width:100%;
-      border:1px dashed var(--border);
-      border-radius:14px;
-      padding:14px;
-      background:#f9fbff;
+      color:#e2e8f0;
     }
+
     .hint{
       font-size:13px;
       color:var(--muted);
-      margin-top:8px;
-      line-height:1.45;
+      margin-top:9px;
+      line-height:1.5;
     }
+
     .actions{
       display:flex;
       flex-wrap:wrap;
       gap:12px;
       margin-top:18px;
     }
-   button{
-  border:none;
-  border-radius:14px;
-  padding:14px 18px;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  transition:.2s ease;
-}
+
+    button{
+      border:none;
+      border-radius:16px;
+      padding:14px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+    }
+
     .btn-primary{
-      background:var(--primary);
-      color:#fff;
+      background:linear-gradient(90deg, #22c55e, #4ade80);
+      color:#052e16;
+      box-shadow:0 0 18px rgba(34,197,94,.28);
     }
-    .btn-primary:hover{background:var(--primary-hover)}
+
+    .btn-primary:hover{
+      filter:brightness(1.03);
+    }
+
     .btn-secondary{
-      background:#eef2ff;
-      color:#1e3a8a;
+      background:rgba(255,255,255,.08);
+      color:#f8fafc;
+      border:1px solid rgba(255,255,255,.08);
     }
-    .btn-secondary:hover{filter:brightness(.98)}
+
+    .btn-secondary:hover{
+      background:rgba(255,255,255,.12);
+    }
+
     .btn-success{
-      background:#ecfdf3;
-      color:var(--success);
+      background:rgba(34,197,94,.14);
+      color:#86efac;
+      border:1px solid rgba(34,197,94,.24);
     }
+
+    .btn-whats{
+      background:rgba(14,165,233,.14);
+      color:#bae6fd;
+      border:1px solid rgba(14,165,233,.24);
+    }
+
     .status{
       margin-top:12px;
       font-size:14px;
-      color:var(--muted);
+      color:#cbd5e1;
       min-height:20px;
     }
+
     .preview{
       margin-top:14px;
       padding:14px;
-      border:1px dashed var(--border);
-      border-radius:14px;
-      background:#fbfdff;
+      border:1px dashed rgba(148,163,184,.22);
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
       display:none;
     }
+
     .preview img{
       width:100%;
       max-height:360px;
       object-fit:contain;
       border-radius:12px;
     }
-    .result{
-  background:#ffffff;
-  border:2px solid #1d4ed8;
-  border-radius:16px;
-  padding:20px;
-  font-size:16px;
-}
+
     .result{
       white-space:pre-wrap;
       line-height:1.75;
       font-size:16px;
-      background:#fcfdff;
-      border:1px solid var(--border);
-      border-radius:16px;
-      padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border-strong);
+      box-shadow:var(--glow);
+      border-radius:18px;
+      padding:22px;
       min-height:160px;
+      color:#f8fafc;
     }
+
     .footer-note{
       text-align:center;
-      color:var(--muted);
+      color:#cbd5e1;
+      font-size:14px;
+      margin-top:14px;
+      padding:18px;
+      border-radius:18px;
+      background:rgba(8,18,38,.58);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter:blur(6px);
+    }
+
+    .verse{
+      margin-top:10px;
+      color:#86efac;
+    }
+
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:14px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
       font-size:13px;
-      margin-top:8px;
+      border-radius:999px;
+      padding:8px 12px;
+      background:rgba(34,197,94,.1);
+      color:#bbf7d0;
+      border:1px solid rgba(34,197,94,.16);
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
-  <h1>EBOM 2026<br>Gerador de Esboço Bíblico</h1>
-  <p>Capacitando obreiros para ministrar com excelência</p>
-  <p style="margin-top:12px; font-size:15px;">
-    1. Escreva ou envie seu rascunho<br>
-    2. Clique em gerar<br>
-    3. Receba seu esboço pronto
-  </p>
-</div>
+      <div class="eyebrow">Escola Bíblica de Obreiros e Membros</div>
+      <h1>EBOM 2026<br>Gerador de Esboço Bíblico</h1>
+      <p class="sub">Cristão na era digital — transforme suas anotações em um esboço bíblico organizado, claro e pronto para ministrar.</p>
+
+      <div class="hero .steps"></div>
+      <div class="steps">
+        <div class="step">1. Escreva ou envie seu rascunho</div>
+        <div class="step">2. Clique em gerar</div>
+        <div class="step">3. Receba seu esboço pronto</div>
+      </div>
+
+      <div class="grid-banner">
+        <div class="mini-card">
+          <strong>Organize a mensagem</strong>
+          Tema, texto base, introdução, tópicos, aplicação e conclusão.
+        </div>
+        <div class="mini-card">
+          <strong>Use texto ou foto</strong>
+          Digite suas anotações ou envie uma foto do seu rascunho.
+        </div>
+        <div class="mini-card">
+          <strong>Compartilhe fácil</strong>
+          Copie, baixe em PDF ou envie para o WhatsApp.
+        </div>
+      </div>
+    </div>
 
     <div class="card">
+      <h2 class="card-title">Monte seu esboço</h2>
+
+      <div class="badge-row">
+        <div class="badge">📖 Estrutura bíblica</div>
+        <div class="badge">📷 Leitura por imagem</div>
+        <div class="badge">📲 Compartilhamento rápido</div>
+      </div>
+
       <div class="grid">
         <div>
           <label for="tema">Tema (opcional)</label>
@@ -200,35 +416,44 @@
 
       <div style="margin-top:16px;">
         <label for="fotoRascunho">📷 Envie uma foto do seu rascunho (opcional)</label>
-        <input id="fotoRascunho" type="file" accept="image/*" />
-       <div class="hint">Dica: escreva de forma legível e tire a foto de frente.</div>
+        <div class="upload-box">
+          <input id="fotoRascunho" type="file" accept="image/*" />
+        </div>
+        <div class="hint">Dica: escreva de forma legível e tire a foto de frente, com boa iluminação e sem cortar a folha.</div>
+
         <div class="preview" id="previewBox">
           <img id="previewImg" alt="Prévia da foto do rascunho" />
         </div>
       </div>
 
       <div class="actions">
-     🔥 Gerar Esboço Agora
+        <button class="btn-primary" id="btnGerar">🔥 Gerar Esboço Agora</button>
         <button class="btn-secondary" id="btnLimpar" type="button">Limpar</button>
       </div>
+
       <div class="status" id="status"></div>
     </div>
 
     <div class="card">
-      <label>Esboço gerado</label>
+      <h2 class="card-title">Esboço gerado</h2>
+
       <div class="result" id="resultado">Seu esboço aparecerá aqui...</div>
+
       <div class="actions">
         <button class="btn-secondary" id="btnCopiar" type="button">Copiar texto</button>
         <button class="btn-success" id="btnPDF" type="button">Baixar PDF</button>
-        <button onclick="enviarWhats()">📲 Enviar para WhatsApp</button>
+        <button class="btn-whats" type="button" onclick="enviarWhats()">📲 Enviar para WhatsApp</button>
       </div>
     </div>
 
     <div class="footer-note">
-  EBOM — Escola de Obreiros e Membros<br><br>
-  "Pregue a Palavra, esteja preparado a tempo e fora de tempo."<br>
-  2 Timóteo 4:2
-</div>
+      EBOM — Escola de Obreiros e Membros
+      <div class="verse">
+        “Pregue a Palavra, esteja preparado a tempo e fora de tempo.”<br>
+        2 Timóteo 4:2
+      </div>
+    </div>
+  </div>
 
   <script>
     const temaEl = document.getElementById('tema');
@@ -349,13 +574,12 @@
       doc.save('esboco-ebom.pdf');
       statusEl.textContent = 'PDF baixado.';
     });
- function enviarWhats(){
-  const texto = document.getElementById('resultado').textContent;
-  if(!texto || texto.includes('Seu esboço')) return;
-  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
-}
-    
-<div style="text-align:center; margin-top:20px; font-size:14px; color:#555;">
-"Pregue a Palavra, esteja preparado a tempo e fora de tempo."<br>
-2 Timóteo 4:2
-</div>
+
+    function enviarWhats(){
+      const texto = document.getElementById('resultado').textContent;
+      if(!texto || texto.includes('Seu esboço')) return;
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+    }
+  </script>
+</body>
+</html>
