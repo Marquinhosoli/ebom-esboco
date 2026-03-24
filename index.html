@@ -33,24 +33,26 @@
       text-align:center;
       margin-bottom:24px;
     }
-    .hero h1{
-      margin:0 0 10px;
-      font-size:clamp(28px, 4vw, 42px);
-    }
+   .hero h1{
+  margin:0 0 10px;
+  font-size:clamp(28px, 4vw, 42px);
+  color:#1e3a8a;
+  line-height:1.2;
+}
     .hero p{
       margin:0;
       color:var(--muted);
       font-size:17px;
       line-height:1.5;
     }
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:24px;
-      margin-bottom:18px;
-    }
+  .card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:24px;
+  margin-bottom:18px;
+}
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -98,15 +100,15 @@
       gap:12px;
       margin-top:18px;
     }
-    button{
-      border:none;
-      border-radius:14px;
-      padding:14px 18px;
-      font-size:15px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s ease;
-    }
+   button{
+  border:none;
+  border-radius:14px;
+  padding:14px 18px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s ease;
+}
     .btn-primary{
       background:var(--primary);
       color:#fff;
@@ -162,9 +164,14 @@
 <body>
   <div class="wrap">
     <div class="hero">
-      <h1>Transforme seu rascunho em esboço bíblico</h1>
-      <p>Digite seu rascunho ou envie uma foto da sua anotação. Em seguida, gere um esboço organizado com tema, texto base, introdução, tópicos, aplicação e conclusão.</p>
-    </div>
+  <h1>EBOM 2026<br>Gerador de Esboço Bíblico</h1>
+  <p>Capacitando obreiros para ministrar com excelência</p>
+  <p style="margin-top:12px; font-size:15px;">
+    1. Escreva ou envie seu rascunho<br>
+    2. Clique em gerar<br>
+    3. Receba seu esboço pronto
+  </p>
+</div>
 
     <div class="card">
       <div class="grid">
@@ -184,16 +191,16 @@
       </div>
 
       <div style="margin-top:16px;">
-        <label for="fotoRascunho">Ou envie uma foto do rascunho</label>
+        <label for="fotoRascunho">📷 Envie uma foto do seu rascunho (opcional)</label>
         <input id="fotoRascunho" type="file" accept="image/*" />
-        <div class="hint">Dica: tire a foto de frente, com boa iluminação e sem cortar a folha.</div>
+       <div class="hint">Dica: escreva de forma legível e tire a foto de frente.</div>
         <div class="preview" id="previewBox">
           <img id="previewImg" alt="Prévia da foto do rascunho" />
         </div>
       </div>
 
       <div class="actions">
-        <button class="btn-primary" id="btnGerar">Gerar Esboço</button>
+       <button class="btn-primary" id="btnGerar">🔥 Gerar Esboço Agora</button>
         <button class="btn-secondary" id="btnLimpar" type="button">Limpar</button>
       </div>
       <div class="status" id="status"></div>
@@ -208,8 +215,11 @@
       </div>
     </div>
 
-    <div class="footer-note">EBOM — Escola de Obreiros e Membros</div>
-  </div>
+    <div class="footer-note">
+  EBOM — Escola de Obreiros e Membros<br><br>
+  "Pregue a Palavra, esteja preparado a tempo e fora de tempo."<br>
+  2 Timóteo 4:2
+</div>
 
   <script>
     const temaEl = document.getElementById('tema');
