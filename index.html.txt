@@ -1,0 +1,77 @@
+html>
+
+      try {
+        const resp = await fetch('/api/gerar-esboco', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tema,
+            textoBase,
+            rascunho,
+            imagemBase64,
+          }),
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          throw new Error(data?.error || 'Erro ao gerar esboço.');
+        }
+
+        resultadoEl.textContent = data.esboco || 'Nenhum conteúdo retornado.';
+        statusEl.textContent = 'Esboço gerado com sucesso.';
+      } catch (err) {
+        resultadoEl.textContent = 'Não foi possível gerar o esboço agora.';
+        statusEl.textContent = err.message || 'Erro inesperado.';
+      } finally {
+        btnGerar.disabled = false;
+      }
+    });
+
+    btnLimpar.addEventListener('click', () => {
+      temaEl.value = '';
+      textoBaseEl.value = '';
+      rascunhoEl.value = '';
+      fotoEl.value = '';
+      imagemBase64 = '';
+      previewBox.style.display = 'none';
+      resultadoEl.textContent = 'Seu esboço aparecerá aqui...';
+      statusEl.textContent = '';
+    });
+
+    btnCopiar.addEventListener('click', async () => {
+      const texto = resultadoEl.textContent.trim();
+      if (!texto || texto === 'Seu esboço aparecerá aqui...') return;
+      await navigator.clipboard.writeText(texto);
+      statusEl.textContent = 'Esboço copiado.';
+    });
+
+    btnPDF.addEventListener('click', () => {
+      const texto = resultadoEl.textContent.trim();
+      if (!texto || texto === 'Seu esboço aparecerá aqui...') {
+        statusEl.textContent = 'Gere um esboço antes de baixar o PDF.';
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const margem = 15;
+      const largura = 180;
+      let y = 20;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('EBOM - Esboço Bíblico', margem, y);
+      y += 10;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      const linhas = doc.splitTextToSize(texto, largura);
+      doc.text(linhas, margem, y);
+
+      doc.save('esboco-ebom.pdf');
+      statusEl.textContent = 'PDF baixado.';
+    });
+  </script>
+</body>
+</html>
