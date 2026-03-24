@@ -463,11 +463,12 @@
 
   <script>
     function salvarHistorico(item) {
-  const chave = "ebom_historico_v1";
-  const atual = JSON.parse(localStorage.getItem(chave) || "[]");
-  atual.unshift(item);
-  localStorage.setItem(chave, JSON.stringify(atual.slice(0, 20)));
-}
+      const chave = "ebom_historico_v1";
+      const atual = JSON.parse(localStorage.getItem(chave) || "[]");
+      atual.unshift(item);
+      localStorage.setItem(chave, JSON.stringify(atual.slice(0, 20)));
+    }
+    
     const temaEl = document.getElementById('tema');
     const textoBaseEl = document.getElementById('textoBase');
     const rascunhoEl = document.getElementById('rascunho');
@@ -544,169 +545,82 @@
         return `${i + 1}. ${item}\n   Explicação: Desenvolva este ponto com base bíblica, aplicação prática e fidelidade ao texto sagrado.`;
       }).join('\n\n');
 
-      return `TEMA: ${temaFinal}
-
-TEXTO BASE: ${baseFinal}
-
-INTRODUÇÃO:
-${introFonte}.
-Mostre o contexto do tema, a necessidade da mensagem e como ela se aplica à igreja nos dias atuais.
-
-DESENVOLVIMENTO:
-
-${topicosFormatados}
-
-APLICAÇÃO:
-${aplicacaoFonte}
-Leve a igreja a refletir, corrigir rotas e colocar a Palavra em prática no dia a dia.
-
-CONCLUSÃO:
-Retome a verdade central da mensagem, reforce o chamado à obediência e encerre com encorajamento espiritual.
-
-${observacaoImagem}ANOTAÇÕES ORIGINAIS:
-${textoLimpo || '(Nenhum texto digitado. Para leitura automática de foto, é preciso ligar a API do site.)'}`;
+      return `TEMA: ${temaFinal}\n\nTEXTO BASE: ${baseFinal}\n\nINTRODUÇÃO:\n${introFonte}.\nMostre o contexto do tema, a necessidade da mensagem e como ela se aplica à igreja nos dias atuais.\n\nDESENVOLVIMENTO:\n\n${topicosFormatados}\n\nAPLICAÇÃO:\n${aplicacaoFonte}\nLeve a igreja a refletir, corrigir rotas e colocar a Palavra em prática no dia a dia.\n\nCONCLUSÃO:\nRetome a verdade central da mensagem, reforce o chamado à obediência e encerre com encorajamento espiritual.\n\n${observacaoImagem}ANOTAÇÕES ORIGINAIS:\n${textoLimpo || '(Nenhum texto digitado. Para leitura automática de foto, é preciso ligar a API do site.)'}`;
     }
 
     async function tentarGeracaoPorAPI(payload) {
-  const resp = await fetch("/api/gerar-esboco", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const bruto = await resp.text();
-  let data = null;
-
-  try {
-    data = bruto ? JSON.parse(bruto) : null;
-  } catch {
-    throw new Error("A API respondeu em formato inválido.");
-  }
-
-  if (!resp.ok) {
-    throw new Error(data?.error || "Erro ao gerar esboço.");
-  }
-
-  return data;
-}
-
-btnGerar.addEventListener("click", async () => {
-  const tema = temaEl.value.trim();
-  const textoBase = textoBaseEl.value.trim();
-  const rascunho = rascunhoEl.value.trim();
-
-  if (!rascunho && !imagemBase64) {
-    statusEl.textContent = "Digite um rascunho ou envie uma foto antes de gerar o esboço.";
-    return;
-  }
-
-  statusEl.textContent = "Gerando esboço...";
-  resultadoEl.textContent = "Processando seu conteúdo...";
-  btnGerar.disabled = true;
-
-  const payload = {
-    tema,
-    textoBase,
-    rascunho,
-    imagemBase64,
-    modo: "pregavel"
-  };
-
-  try {
-    try {
-      const data = await tentarGeracaoPorAPI(payload);
-
-      const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
-      const textoExtraido = data?.textoExtraido || "";
-
-      resultadoEl.textContent = esbocoFinal;
-      statusEl.textContent = textoExtraido
-        ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
-        : "Esboço gerado com sucesso pela API.";
-
-      salvarHistorico({
-        data: new Date().toISOString(),
-        tema,
-        textoBase,
-        rascunho,
-        textoExtraido,
-        esboco: esbocoFinal
+      const resp = await fetch("/api/gerar-esboco", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-    } catch (apiError) {
-      const esbocoLocal = gerarEsbocoLocal(payload);
-      resultadoEl.textContent = esbocoLocal;
-      statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
-    }
-  } catch (err) {
-    resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
-    statusEl.textContent = err.message || "Erro inesperado.";
-  } finally {
-    btnGerar.disabled = false;
-  }
-});
 
-  const payload = {
-    tema,
-    textoBase,
-    rascunho,
-    imagemBase64,
-    modo: "pregavel"
-  };
-
-  try {
-    try {
-      const data = await tentarGeracaoPorAPI(payload);
-
-      const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
-      const textoExtraido = data?.textoExtraido || "";
-
-      resultadoEl.textContent = esbocoFinal;
-      statusEl.textContent = textoExtraido
-        ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
-        : "Esboço gerado com sucesso pela API.";
-
-      salvarHistorico({
-        data: new Date().toISOString(),
-        tema,
-        textoBase,
-        rascunho,
-        textoExtraido,
-        esboco: esbocoFinal
-      });
-    } catch (apiError) {
-      const esbocoLocal = gerarEsbocoLocal(payload);
-      resultadoEl.textContent = esbocoLocal;
-      statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
-    }
-  } catch (err) {
-    resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
-    statusEl.textContent = err.message || "Erro inesperado.";
-  } finally {
-    btnGerar.disabled = false;
-  }
-});  
-
-      statusEl.textContent = 'Gerando esboço...';
-      resultadoEl.textContent = 'Processando seu conteúdo...';
-      btnGerar.disabled = true;
-
-      const payload = { tema, textoBase, rascunho, imagemBase64 };
+      const bruto = await resp.text();
+      let data = null;
 
       try {
-        let esboco = '';
+        data = bruto ? JSON.parse(bruto) : null;
+      } catch {
+        throw new Error("A API respondeu em formato inválido.");
+      }
 
+      if (!resp.ok) {
+        throw new Error(data?.error || "Erro ao gerar esboço.");
+      }
+
+      return data;
+    }
+
+    btnGerar.addEventListener("click", async () => {
+      const tema = temaEl.value.trim();
+      const textoBase = textoBaseEl.value.trim();
+      const rascunho = rascunhoEl.value.trim();
+
+      if (!rascunho && !imagemBase64) {
+        statusEl.textContent = "Digite um rascunho ou envie uma foto antes de gerar o esboço.";
+        return;
+      }
+
+      statusEl.textContent = "Gerando esboço...";
+      resultadoEl.textContent = "Processando seu conteúdo...";
+      btnGerar.disabled = true;
+
+      const payload = {
+        tema,
+        textoBase,
+        rascunho,
+        imagemBase64,
+        modo: "pregavel"
+      };
+
+      try {
         try {
-          esboco = await tentarGeracaoPorAPI(payload);
-          statusEl.textContent = 'Esboço gerado com sucesso pela API.';
+          const data = await tentarGeracaoPorAPI(payload);
+
+          const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
+          const textoExtraido = data?.textoExtraido || "";
+
+          resultadoEl.textContent = esbocoFinal;
+          statusEl.textContent = textoExtraido
+            ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
+            : "Esboço gerado com sucesso pela API.";
+
+          salvarHistorico({
+            data: new Date().toISOString(),
+            tema,
+            textoBase,
+            rascunho,
+            textoExtraido,
+            esboco: esbocoFinal
+          });
         } catch (apiError) {
-          esboco = gerarEsbocoLocal(payload);
+          const esbocoLocal = gerarEsbocoLocal(payload);
+          resultadoEl.textContent = esbocoLocal;
           statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
         }
-
-        resultadoEl.textContent = esboco || 'Nenhum conteúdo retornado.';
       } catch (err) {
-        resultadoEl.textContent = 'Não foi possível gerar o esboço agora.';
-        statusEl.textContent = err.message || 'Erro inesperado.';
+        resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
+        statusEl.textContent = err.message || "Erro inesperado.";
       } finally {
         btnGerar.disabled = false;
       }
@@ -747,6 +661,7 @@ btnGerar.addEventListener("click", async () => {
       const doc = new jsPDF({ unit: 'mm', format: 'a4' });
       const margem = 15;
       const largura = 180;
+      const pageHeight = doc.internal.pageSize.height;
       let y = 20;
 
       doc.setFont('helvetica', 'bold');
@@ -756,8 +671,17 @@ btnGerar.addEventListener("click", async () => {
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
+      
       const linhas = doc.splitTextToSize(texto, largura);
-      doc.text(linhas, margem, y);
+      
+      for (let i = 0; i < linhas.length; i++) {
+        if (y > pageHeight - 20) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(linhas[i], margem, y);
+        y += 6; 
+      }
 
       doc.save('esboco-ebom.pdf');
       statusEl.textContent = 'PDF baixado.';
