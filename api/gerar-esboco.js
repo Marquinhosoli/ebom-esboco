@@ -4,7 +4,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { rascunho, tema, textoBase } = req.body;
+    const { rascunho, tema, textoBase } = req.body || {};
+
+    if (!rascunho || !rascunho.trim()) {
+      return res.status(400).json({ error: "Nenhum rascunho foi enviado." });
+    }
 
     const prompt = `
 Crie um esboço bíblico forte, claro e pregável.
@@ -33,7 +37,10 @@ Monte com:
       body: JSON.stringify({
         model: "gpt-4.1-mini",
         messages: [
-          { role: "user", content: prompt }
+          {
+            role: "user",
+            content: prompt
+          }
         ],
         temperature: 0.7
       })
@@ -41,11 +48,25 @@ Monte com:
 
     const data = await response.json();
 
-    const esboco = data.choices?.[0]?.message?.content || "Erro ao gerar";
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data?.error?.message || "Erro ao consultar a OpenAI."
+      });
+    }
 
-    res.status(200).json({ esboco });
+    const esboco = data?.choices?.[0]?.message?.content;
+
+    if (!esboco) {
+      return res.status(500).json({
+        error: "A OpenAI respondeu, mas não retornou conteúdo do esboço."
+      });
+    }
+
+    return res.status(200).json({ esboco });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({
+      error: error.message || "Erro interno no servidor."
+    });
   }
 }
