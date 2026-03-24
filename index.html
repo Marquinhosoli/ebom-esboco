@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EBOM - Gerador de Esboço Bíblico</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#17202a;
+      --muted:#6b7280;
+      --primary:#1d4ed8;
+      --primary-hover:#1e40af;
+      --border:#dbe3ef;
+      --success:#15803d;
+      --shadow:0 14px 40px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(180deg,#eef4ff 0%, var(--bg) 100%);
+      color:var(--text);
+    }
+    .wrap{
+      width:min(980px, 94%);
+      margin:32px auto;
+    }
+    .hero{
+      text-align:center;
+      margin-bottom:24px;
+    }
+    .hero h1{
+      margin:0 0 10px;
+      font-size:clamp(28px, 4vw, 42px);
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.5;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin-bottom:18px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+    }
+    @media (max-width: 760px){
+      .grid{grid-template-columns:1fr}
+    }
+    label{
+      display:block;
+      font-weight:700;
+      margin-bottom:8px;
+      font-size:14px;
+    }
+    input[type="text"], textarea{
+      width:100%;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 15px;
+      font-size:15px;
+      outline:none;
+      background:#fff;
+    }
+    textarea{
+      min-height:220px;
+      resize:vertical;
+      line-height:1.5;
+    }
+    input[type="file"]{
+      width:100%;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:#f9fbff;
+    }
+    .hint{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:8px;
+      line-height:1.45;
+    }
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:18px;
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:14px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+    .btn-primary:hover{background:var(--primary-hover)}
+    .btn-secondary{
+      background:#eef2ff;
+      color:#1e3a8a;
+    }
+    .btn-secondary:hover{filter:brightness(.98)}
+    .btn-success{
+      background:#ecfdf3;
+      color:var(--success);
+    }
+    .status{
+      margin-top:12px;
+      font-size:14px;
+      color:var(--muted);
+      min-height:20px;
+    }
+    .preview{
+      margin-top:14px;
+      padding:14px;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      background:#fbfdff;
+      display:none;
+    }
+    .preview img{
+      width:100%;
+      max-height:360px;
+      object-fit:contain;
+      border-radius:12px;
+    }
+    .result{
+      white-space:pre-wrap;
+      line-height:1.75;
+      font-size:16px;
+      background:#fcfdff;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+      min-height:160px;
+    }
+    .footer-note{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      margin-top:8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Transforme seu rascunho em esboço bíblico</h1>
+      <p>Digite seu rascunho ou envie uma foto da sua anotação. Em seguida, gere um esboço organizado com tema, texto base, introdução, tópicos, aplicação e conclusão.</p>
+    </div>
+
+    <div class="card">
+      <div class="grid">
+        <div>
+          <label for="tema">Tema (opcional)</label>
+          <input id="tema" type="text" placeholder="Ex.: A fé que persevera" />
+        </div>
+        <div>
+          <label for="textoBase">Texto base (opcional)</label>
+          <input id="textoBase" type="text" placeholder="Ex.: Hebreus 11:1" />
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label for="rascunho">Digite ou cole seu rascunho</label>
+        <textarea id="rascunho" placeholder="Escreva aqui suas anotações, ideias, tópicos, versículos ou observações..."></textarea>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label for="fotoRascunho">Ou envie uma foto do rascunho</label>
+        <input id="fotoRascunho" type="file" accept="image/*" />
+        <div class="hint">Dica: tire a foto de frente, com boa iluminação e sem cortar a folha.</div>
+        <div class="preview" id="previewBox">
+          <img id="previewImg" alt="Prévia da foto do rascunho" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="btnGerar">Gerar Esboço</button>
+        <button class="btn-secondary" id="btnLimpar" type="button">Limpar</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+
+    <div class="card">
+      <label>Esboço gerado</label>
+      <div class="result" id="resultado">Seu esboço aparecerá aqui...</div>
+      <div class="actions">
+        <button class="btn-secondary" id="btnCopiar" type="button">Copiar texto</button>
+        <button class="btn-success" id="btnPDF" type="button">Baixar PDF</button>
+      </div>
+    </div>
+
+    <div class="footer-note">EBOM — Escola de Obreiros e Membros</div>
+  </div>
+
+  <script>
+    const temaEl = document.getElementById('tema');
+    const textoBaseEl = document.getElementById('textoBase');
+    const rascunhoEl = document.getElementById('rascunho');
+    const fotoEl = document.getElementById('fotoRascunho');
+    const btnGerar = document.getElementById('btnGerar');
+    const btnLimpar = document.getElementById('btnLimpar');
+    const btnCopiar = document.getElementById('btnCopiar');
+    const btnPDF = document.getElementById('btnPDF');
+    const resultadoEl = document.getElementById('resultado');
+    const statusEl = document.getElementById('status');
+    const previewBox = document.getElementById('previewBox');
+    const previewImg = document.getElementById('previewImg');
+
+    let imagemBase64 = '';
+
+    fotoEl.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) {
+        imagemBase64 = '';
+        previewBox.style.display = 'none';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        imagemBase64 = reader.result;
+        previewImg.src = imagemBase64;
+        previewBox.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    btnGerar.addEventListener('click', async () => {
+      const tema = temaEl.value.trim();
+      const textoBase = textoBaseEl.value.trim();
+      const rascunho = rascunhoEl.value.trim();
+
+      if (!rascunho && !imagemBase64) {
+        statusEl.textContent = 'Digite um rascunho ou envie uma foto antes de gerar o esboço.';
+        return;
+      }
+
+      statusEl.textContent = 'Gerando esboço...';
+      resultadoEl.textContent = 'Processando seu conteúdo...';
+      btnGerar.disabled = true;
+
+      try {
+        const resp = await fetch('/api/gerar-esboco', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tema,
+            textoBase,
+            rascunho,
+            imagemBase64,
+          }),
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          throw new Error(data?.error || 'Erro ao gerar esboço.');
+        }
+
+        resultadoEl.textContent = data.esboco || 'Nenhum conteúdo retornado.';
+        statusEl.textContent = 'Esboço gerado com sucesso.';
+      } catch (err) {
+        resultadoEl.textContent = 'Não foi possível gerar o esboço agora.';
+        statusEl.textContent = err.message || 'Erro inesperado.';
+      } finally {
+        btnGerar.disabled = false;
+      }
+    });
+
+    btnLimpar.addEventListener('click', () => {
+      temaEl.value = '';
+      textoBaseEl.value = '';
+      rascunhoEl.value = '';
+      fotoEl.value = '';
+      imagemBase64 = '';
+      previewBox.style.display = 'none';
+      resultadoEl.textContent = 'Seu esboço aparecerá aqui...';
+      statusEl.textContent = '';
+    });
+
+    btnCopiar.addEventListener('click', async () => {
+      const texto = resultadoEl.textContent.trim();
+      if (!texto || texto === 'Seu esboço aparecerá aqui...') return;
+      await navigator.clipboard.writeText(texto);
+      statusEl.textContent = 'Esboço copiado.';
+    });
+
+    btnPDF.addEventListener('click', () => {
+      const texto = resultadoEl.textContent.trim();
+      if (!texto || texto === 'Seu esboço aparecerá aqui...') {
+        statusEl.textContent = 'Gere um esboço antes de baixar o PDF.';
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const margem = 15;
+      const largura = 180;
+      let y = 20;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('EBOM - Esboço Bíblico', margem, y);
+      y += 10;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(12);
+      const linhas = doc.splitTextToSize(texto, largura);
+      doc.text(linhas, margem, y);
+
+      doc.save('esboco-ebom.pdf');
+      statusEl.textContent = 'PDF baixado.';
+    });
+  </script>
+</body>
+</html>
