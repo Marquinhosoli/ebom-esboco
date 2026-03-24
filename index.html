@@ -145,6 +145,13 @@
       border-radius:12px;
     }
     .result{
+  background:#ffffff;
+  border:2px solid #1d4ed8;
+  border-radius:16px;
+  padding:20px;
+  font-size:16px;
+}
+    .result{
       white-space:pre-wrap;
       line-height:1.75;
       font-size:16px;
@@ -201,7 +208,7 @@
       </div>
 
       <div class="actions">
-       <button class="btn-primary" id="btnGerar">🔥 Gerar Esboço Agora</button>
+     🔥 Gerar Esboço Agora
         <button class="btn-secondary" id="btnLimpar" type="button">Limpar</button>
       </div>
       <div class="status" id="status"></div>
@@ -213,6 +220,7 @@
       <div class="actions">
         <button class="btn-secondary" id="btnCopiar" type="button">Copiar texto</button>
         <button class="btn-success" id="btnPDF" type="button">Baixar PDF</button>
+        <button onclick="enviarWhats()">📲 Enviar para WhatsApp</button>
       </div>
     </div>
 
@@ -342,5 +350,14 @@
       statusEl.textContent = 'PDF baixado.';
     });
   </script>
+    function enviarWhats(){
+  const texto = document.getElementById('resultado').textContent;
+  if(!texto || texto.includes('Seu esboço')) return;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
+}
 </body>
 </html>
+<div style="text-align:center; margin-top:20px; font-size:14px; color:#555;">
+"Pregue a Palavra, esteja preparado a tempo e fora de tempo."<br>
+2 Timóteo 4:2
+</div>
