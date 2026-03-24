@@ -349,14 +349,12 @@
       doc.save('esboco-ebom.pdf');
       statusEl.textContent = 'PDF baixado.';
     });
-  </script>
-    function enviarWhats(){
+ function enviarWhats(){
   const texto = document.getElementById('resultado').textContent;
   if(!texto || texto.includes('Seu esboço')) return;
   window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`);
 }
-</body>
-</html>
+    
 <div style="text-align:center; margin-top:20px; font-size:14px; color:#555;">
 "Pregue a Palavra, esteja preparado a tempo e fora de tempo."<br>
 2 Timóteo 4:2
