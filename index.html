@@ -462,6 +462,12 @@
   </div>
 
   <script>
+    function salvarHistorico(item) {
+  const chave = "ebom_historico_v1";
+  const atual = JSON.parse(localStorage.getItem(chave) || "[]");
+  atual.unshift(item);
+  localStorage.setItem(chave, JSON.stringify(atual.slice(0, 20)));
+}
     const temaEl = document.getElementById('tema');
     const textoBaseEl = document.getElementById('textoBase');
     const rascunhoEl = document.getElementById('rascunho');
@@ -562,37 +568,123 @@ ${textoLimpo || '(Nenhum texto digitado. Para leitura automática de foto, é pr
     }
 
     async function tentarGeracaoPorAPI(payload) {
-      const resp = await fetch('/api/gerar-esboco', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+  const resp = await fetch("/api/gerar-esboco", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const bruto = await resp.text();
+  let data = null;
+
+  try {
+    data = bruto ? JSON.parse(bruto) : null;
+  } catch {
+    throw new Error("A API respondeu em formato inválido.");
+  }
+
+  if (!resp.ok) {
+    throw new Error(data?.error || "Erro ao gerar esboço.");
+  }
+
+  return data;
+}
+
+btnGerar.addEventListener("click", async () => {
+  const tema = temaEl.value.trim();
+  const textoBase = textoBaseEl.value.trim();
+  const rascunho = rascunhoEl.value.trim();
+
+  if (!rascunho && !imagemBase64) {
+    statusEl.textContent = "Digite um rascunho ou envie uma foto antes de gerar o esboço.";
+    return;
+  }
+
+  statusEl.textContent = "Gerando esboço...";
+  resultadoEl.textContent = "Processando seu conteúdo...";
+  btnGerar.disabled = true;
+
+  const payload = {
+    tema,
+    textoBase,
+    rascunho,
+    imagemBase64,
+    modo: "pregavel"
+  };
+
+  try {
+    try {
+      const data = await tentarGeracaoPorAPI(payload);
+
+      const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
+      const textoExtraido = data?.textoExtraido || "";
+
+      resultadoEl.textContent = esbocoFinal;
+      statusEl.textContent = textoExtraido
+        ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
+        : "Esboço gerado com sucesso pela API.";
+
+      salvarHistorico({
+        data: new Date().toISOString(),
+        tema,
+        textoBase,
+        rascunho,
+        textoExtraido,
+        esboco: esbocoFinal
       });
-
-      const bruto = await resp.text();
-      let data = null;
-
-      try {
-        data = bruto ? JSON.parse(bruto) : null;
-      } catch (e) {
-        throw new Error('API indisponível no site publicado. Ative a rota /api/gerar-esboco ou use a geração local.');
-      }
-
-      if (!resp.ok) {
-        throw new Error(data?.error || 'Erro ao gerar esboço.');
-      }
-
-      return data?.esboco || '';
+    } catch (apiError) {
+      const esbocoLocal = gerarEsbocoLocal(payload);
+      resultadoEl.textContent = esbocoLocal;
+      statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
     }
+  } catch (err) {
+    resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
+    statusEl.textContent = err.message || "Erro inesperado.";
+  } finally {
+    btnGerar.disabled = false;
+  }
+});
 
-    btnGerar.addEventListener('click', async () => {
-      const tema = temaEl.value.trim();
-      const textoBase = textoBaseEl.value.trim();
-      const rascunho = rascunhoEl.value.trim();
+  const payload = {
+    tema,
+    textoBase,
+    rascunho,
+    imagemBase64,
+    modo: "pregavel"
+  };
 
-      if (!rascunho && !imagemBase64) {
-        statusEl.textContent = 'Digite um rascunho ou envie uma foto antes de gerar o esboço.';
-        return;
-      }
+  try {
+    try {
+      const data = await tentarGeracaoPorAPI(payload);
+
+      const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
+      const textoExtraido = data?.textoExtraido || "";
+
+      resultadoEl.textContent = esbocoFinal;
+      statusEl.textContent = textoExtraido
+        ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
+        : "Esboço gerado com sucesso pela API.";
+
+      salvarHistorico({
+        data: new Date().toISOString(),
+        tema,
+        textoBase,
+        rascunho,
+        textoExtraido,
+        esboco: esbocoFinal
+      });
+    } catch (apiError) {
+      const esbocoLocal = gerarEsbocoLocal(payload);
+      resultadoEl.textContent = esbocoLocal;
+      statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
+    }
+  } catch (err) {
+    resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
+    statusEl.textContent = err.message || "Erro inesperado.";
+  } finally {
+    btnGerar.disabled = false;
+  }
+});  
 
       statusEl.textContent = 'Gerando esboço...';
       resultadoEl.textContent = 'Processando seu conteúdo...';
