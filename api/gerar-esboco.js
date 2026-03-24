@@ -1,177 +1,52 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido" });
+const { OpenAI } = require('openai');
+
+const openai = new OpenAI({
+  // A plataforma de hospedagem vai injetar a chave aqui automaticamente
+  apiKey: process.env.OPENAI_API_KEY, 
+});
+
+module.exports = async function handler(req, res) {
+  // Ignora requisições que não sejam de envio de dados (POST)
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido.' });
   }
 
   try {
-    const {
-      rascunho = "",
-      tema = "",
-      textoBase = "",
-      imagemBase64 = "",
-      modo = "pregavel"
-    } = req.body || {};
+    const { tema, textoBase, rascunho, imagemBase64 } = req.body;
 
-    if (!rascunho.trim() && !imagemBase64) {
-      return res.status(400).json({
-        error: "Envie um rascunho digitado ou uma imagem."
-      });
-    }
+    // Prepara as instruções teológicas
+    let promptText = `Atue como um teólogo e pastor experiente de linha pentecostal assembleiana. Crie um esboço bíblico bem estruturado com Introdução, Tópicos principais (com base bíblica), Aplicação Prática e Conclusão.\n`;
+    if (tema) promptText += `Tema: ${tema}\n`;
+    if (textoBase) promptText += `Texto Base: ${textoBase}\n`;
+    if (rascunho) promptText += `Anotações do rascunho: ${rascunho}\n`;
+    if (imagemBase64) promptText += `Extraia também as ideias escritas à mão na imagem fornecida e integre ao esboço.\n`;
 
-    const instrucoesPorModo = {
-      rapido: `
-Monte um esboço objetivo, enxuto e claro.
-Use:
-- Tema
-- Texto base
-- Introdução curta
-- 3 tópicos
-- Aplicação
-- Conclusão
-`,
-      pregavel: `
-Monte um esboço bíblico forte, claro e pregável.
-Use:
-- Tema
-- Texto base
-- Introdução impactante
-- 3 a 5 tópicos com explicação
-- Aplicação prática
-- Conclusão espiritual forte
-`,
-      aula: `
-Monte um esboço em formato de aula bíblica.
-Use:
-- Tema
-- Texto base
-- Objetivo da aula
-- Contexto bíblico
-- 3 a 5 tópicos explicativos
-- Aplicações
-- Perguntas para reflexão
-- Conclusão
-`,
-      estudo: `
-Monte um esboço em formato de estudo bíblico.
-Use:
-- Tema
-- Texto base
-- Introdução
-- Explicação detalhada por tópicos
-- Principais lições
-- Aplicação prática
-- Conclusão
-`
-    };
+    let contentArray = [{ type: "text", text: promptText }];
 
-    const instrucaoModo =
-      instrucoesPorModo[modo] || instrucoesPorModo.pregavel;
-
-    const promptPrincipal = `
-Você é um assistente cristão especializado em transformar anotações em esboços bíblicos bem organizados.
-
-Tarefas:
-1. Se houver imagem, primeiro leia e transcreva fielmente a anotação manuscrita.
-2. Se houver rascunho digitado, combine com a imagem.
-3. Corrija apenas erros evidentes de leitura, sem inventar conteúdo.
-4. Depois monte o esboço final.
-
-Preferências:
-- Mantenha tom bíblico, claro e edificante.
-- Não floreie demais.
-- Se o tema estiver implícito, identifique o melhor tema.
-- Se o texto base não for informado, sugira um coerente.
-- Se houver trechos ilegíveis na imagem, mencione brevemente as incertezas.
-
-Tema informado: ${tema || "(não informado)"}
-Texto base informado: ${textoBase || "(não informado)"}
-
-Formato desejado:
-${instrucaoModo}
-
-Quero a resposta EXATAMENTE neste formato:
-
-TEXTO EXTRAÍDO:
-[coloque aqui a transcrição da imagem e/ou do rascunho]
-
-ESBOÇO:
-[coloque aqui o esboço final]
-`;
-
-    const content = [
-      {
-        type: "input_text",
-        text: promptPrincipal
-      }
-    ];
-
-    if (rascunho.trim()) {
-      content.push({
-        type: "input_text",
-        text: `RASCUNHO DIGITADO:\n${rascunho.trim()}`
-      });
-    }
-
+    // Adiciona a foto se ela existir
     if (imagemBase64) {
-      content.push({
-        type: "input_image",
-        image_url: imagemBase64,
-        detail: "high"
+      contentArray.push({
+        type: "image_url",
+        image_url: { url: imagemBase64 }
       });
     }
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: [
-          {
-            role: "user",
-            content
-          }
-        ]
-      })
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "Você é um assistente especialista em homilética e criação de esboços para pregações cristãs." },
+        { role: "user", content: contentArray }
+      ],
+      temperature: 0.7,
     });
 
-    const data = await response.json();
+    const esbocoGerado = response.choices[0].message.content;
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data?.error?.message || "Erro ao consultar a OpenAI."
-      });
-    }
+    // Devolve o resultado para o site
+    res.status(200).json({ esboco: esbocoGerado, textoExtraido: "Leitura concluída com sucesso." });
 
-    const texto = data?.output_text?.trim();
-
-    if (!texto) {
-      return res.status(500).json({
-        error: "A OpenAI respondeu, mas não retornou texto."
-      });
-    }
-
-    const partes = texto.split("ESBOÇO:");
-    let textoExtraido = "";
-    let esboco = texto;
-
-    if (partes.length >= 2) {
-      textoExtraido = partes[0]
-        .replace("TEXTO EXTRAÍDO:", "")
-        .trim();
-      esboco = partes.slice(1).join("ESBOÇO:").trim();
-    }
-
-    return res.status(200).json({
-      esboco,
-      textoExtraido,
-      bruto: texto
-    });
   } catch (error) {
-    return res.status(500).json({
-      error: error.message || "Erro interno no servidor."
-    });
+    console.error("Erro na API:", error);
+    res.status(500).json({ error: error.message || "Erro ao comunicar com a inteligência artificial." });
   }
-}
+};
