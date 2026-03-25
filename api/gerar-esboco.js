@@ -1,12 +1,11 @@
-const { OpenAI } = require('openai');
+import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  // A plataforma de hospedagem vai injetar a chave aqui automaticamente
   apiKey: process.env.OPENAI_API_KEY, 
 });
 
-module.exports = async function handler(req, res) {
-  // Ignora requisições que não sejam de envio de dados (POST)
+export default async function handler(req, res) {
+  // Ignora pedidos que não sejam de envio de dados (POST)
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido.' });
   }
@@ -49,4 +48,4 @@ module.exports = async function handler(req, res) {
     console.error("Erro na API:", error);
     res.status(500).json({ error: error.message || "Erro ao comunicar com a inteligência artificial." });
   }
-};
+}
