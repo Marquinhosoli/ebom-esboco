@@ -166,11 +166,9 @@
       .grid-banner{
         grid-template-columns:1fr;
       }
-
       .hero{
         padding:22px 14px 16px;
       }
-
       .hero .sub{
         font-size:17px;
       }
@@ -299,20 +297,24 @@
       line-height:1.5;
     }
 
+    /* Modificado para suportar galeria de imagens */
     .preview{
       margin-top:14px;
       padding:14px;
       border:1px dashed rgba(148,163,184,.22);
       border-radius:16px;
       background:rgba(255,255,255,.03);
-      display:none;
+      display:none; 
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .preview img{
-      width:100%;
-      max-height:360px;
-      object-fit:contain;
-      border-radius:12px;
+      width: 100px;
+      height: 140px;
+      object-fit:cover;
+      border-radius:8px;
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
     .result{
@@ -385,7 +387,7 @@
         </div>
         <div class="mini-card">
           <strong>Use texto ou foto</strong>
-          Digite suas anotações ou envie uma foto do seu rascunho.
+          Digite suas anotações ou envie fotos do seu caderno.
         </div>
         <div class="mini-card">
           <strong>Compartilhe fácil</strong>
@@ -399,7 +401,7 @@
 
       <div class="badge-row">
         <div class="badge">📖 Estrutura bíblica</div>
-        <div class="badge">📷 Leitura por imagem</div>
+        <div class="badge">📷 Leitura de múltiplas páginas</div>
         <div class="badge">📲 Compartilhamento rápido</div>
       </div>
 
@@ -420,16 +422,14 @@
       </div>
 
       <div style="margin-top:16px;">
-        <label for="fotoRascunho">📷 Envie uma foto do seu rascunho (opcional)</label>
+        <label for="fotoRascunho">📷 Envie fotos do seu rascunho (opcional)</label>
         <div class="upload-box">
-          <input id="fotoRascunho" type="file" accept="image/*" />
+          <input id="fotoRascunho" type="file" accept="image/*" multiple />
         </div>
-        <div class="hint">Dica: escreva de forma legível e tire a foto de frente, com boa iluminação e sem cortar a folha.</div>
-        <div class="hint">Se o site estiver sem API ativa, a foto serve só como pré-visualização.</div>
+        <div class="hint">Dica: Selecione várias fotos de uma vez se sua anotação tiver mais de uma página.</div>
 
         <div class="preview" id="previewBox">
-          <img id="previewImg" alt="Prévia da foto do rascunho" />
-        </div>
+           </div>
       </div>
 
       <div class="actions">
@@ -480,61 +480,97 @@
     const resultadoEl = document.getElementById('resultado');
     const statusEl = document.getElementById('status');
     const previewBox = document.getElementById('previewBox');
-    const previewImg = document.getElementById('previewImg');
 
-    let imagemBase64 = '';
+    // Agora guardamos uma lista (array) de imagens
+    let imagensBase64 = [];
 
-    fotoEl.addEventListener('change', (e) => {
-      const file = e.target.files?.[0];
-      if (!file) {
-        imagemBase64 = '';
-        previewImg.src = '';
+    // Função para comprimir a imagem no próprio navegador
+    function comprimirImagem(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1200; // Resolução suficiente para IA ler texto
+            const scaleSize = MAX_WIDTH / img.width;
+            
+            // Só diminui se a imagem for maior que o máximo
+            if (scaleSize < 1) {
+              canvas.width = MAX_WIDTH;
+              canvas.height = img.height * scaleSize;
+            } else {
+              canvas.width = img.width;
+              canvas.height = img.height;
+            }
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            // Comprime em formato JPEG com 75% de qualidade
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
+          };
+          img.onerror = (err) => reject(err);
+        };
+      });
+    }
+
+    fotoEl.addEventListener('change', async (e) => {
+      const files = e.target.files;
+      imagensBase64 = [];
+      previewBox.innerHTML = ''; // Limpa as miniaturas anteriores
+
+      if (!files || files.length === 0) {
         previewBox.style.display = 'none';
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        imagemBase64 = reader.result || '';
-        previewImg.src = imagemBase64;
-        previewBox.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
+      previewBox.style.display = 'flex';
+      statusEl.textContent = 'Otimizando imagens para envio...';
+      btnGerar.disabled = true; // Impede gerar antes de comprimir
+
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const imagemComprimida = await comprimirImagem(file);
+          imagensBase64.push(imagemComprimida);
+
+          // Cria a miniatura na tela
+          const imgEl = document.createElement('img');
+          imgEl.src = imagemComprimida;
+          previewBox.appendChild(imgEl);
+        }
+        statusEl.textContent = `${files.length} página(s) anexada(s) com sucesso.`;
+      } catch (error) {
+        statusEl.textContent = 'Erro ao processar imagens. Tente novamente.';
+        console.error(error);
+      } finally {
+        btnGerar.disabled = false;
+      }
     });
 
     function limparTexto(texto = '') {
-      return texto
-        .replace(/\r/g, '')
-        .replace(/[ \t]+\n/g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+      return texto.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
     }
 
     function dividirTopicos(texto) {
-      const linhas = limparTexto(texto)
-        .split('\n')
-        .map(l => l.replace(/^[-•*]\s*/, '').trim())
-        .filter(Boolean);
-
+      const linhas = limparTexto(texto).split('\n').map(l => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
       if (linhas.length >= 3) return linhas.slice(0, 6);
-
-      const frases = limparTexto(texto)
-        .split(/[.;]\s+/)
-        .map(f => f.trim())
-        .filter(f => f.length > 10);
-
+      const frases = limparTexto(texto).split(/[.;]\s+/).map(f => f.trim()).filter(f => f.length > 10);
       return frases.slice(0, 6);
     }
 
-    function gerarEsbocoLocal({ tema, textoBase, rascunho, imagemBase64 }) {
+    function gerarEsbocoLocal({ tema, textoBase, rascunho, imagensBase64 }) {
       const textoLimpo = limparTexto(rascunho);
       const topicosBase = dividirTopicos(textoLimpo);
       const temaFinal = tema || topicosBase[0] || 'Tema extraído das anotações';
       const baseFinal = textoBase || 'Texto base a definir';
       const introFonte = topicosBase[0] || textoLimpo || 'As anotações apresentadas apontam para uma mensagem relevante e atual.';
       const aplicacaoFonte = topicosBase[topicosBase.length - 1] || 'Viver a Palavra com fidelidade, obediência e perseverança.';
-      const observacaoImagem = imagemBase64 && !textoLimpo
-        ? '\nObservação: a foto foi carregada, mas sem API ativa o site ainda não lê o texto da imagem automaticamente.\n'
+      
+      const avisoImagem = imagensBase64.length > 0 && !textoLimpo
+        ? '\nObservação: as fotos foram carregadas, mas a leitura automática falhou.\n'
         : '';
 
       const topicosFormatados = (topicosBase.length ? topicosBase : [
@@ -545,7 +581,7 @@
         return `${i + 1}. ${item}\n   Explicação: Desenvolva este ponto com base bíblica, aplicação prática e fidelidade ao texto sagrado.`;
       }).join('\n\n');
 
-      return `TEMA: ${temaFinal}\n\nTEXTO BASE: ${baseFinal}\n\nINTRODUÇÃO:\n${introFonte}.\nMostre o contexto do tema, a necessidade da mensagem e como ela se aplica à igreja nos dias atuais.\n\nDESENVOLVIMENTO:\n\n${topicosFormatados}\n\nAPLICAÇÃO:\n${aplicacaoFonte}\nLeve a igreja a refletir, corrigir rotas e colocar a Palavra em prática no dia a dia.\n\nCONCLUSÃO:\nRetome a verdade central da mensagem, reforce o chamado à obediência e encerre com encorajamento espiritual.\n\n${observacaoImagem}ANOTAÇÕES ORIGINAIS:\n${textoLimpo || '(Nenhum texto digitado. Para leitura automática de foto, é preciso ligar a API do site.)'}`;
+      return `TEMA: ${temaFinal}\n\nTEXTO BASE: ${baseFinal}\n\nINTRODUÇÃO:\n${introFonte}.\nMostre o contexto do tema, a necessidade da mensagem e como ela se aplica à igreja nos dias atuais.\n\nDESENVOLVIMENTO:\n\n${topicosFormatados}\n\nAPLICAÇÃO:\n${aplicacaoFonte}\nLeve a igreja a refletir, corrigir rotas e colocar a Palavra em prática no dia a dia.\n\nCONCLUSÃO:\nRetome a verdade central da mensagem, reforce o chamado à obediência e encerre com encorajamento espiritual.\n\n${avisoImagem}ANOTAÇÕES ORIGINAIS:\n${textoLimpo || '(Nenhum texto digitado.)'}`;
     }
 
     async function tentarGeracaoPorAPI(payload) {
@@ -576,20 +612,20 @@
       const textoBase = textoBaseEl.value.trim();
       const rascunho = rascunhoEl.value.trim();
 
-      if (!rascunho && !imagemBase64) {
-        statusEl.textContent = "Digite um rascunho ou envie uma foto antes de gerar o esboço.";
+      if (!rascunho && imagensBase64.length === 0) {
+        statusEl.textContent = "Digite um rascunho ou envie fotos antes de gerar o esboço.";
         return;
       }
 
-      statusEl.textContent = "Gerando esboço...";
-      resultadoEl.textContent = "Processando seu conteúdo...";
+      statusEl.textContent = "Lendo anotações e gerando esboço...";
+      resultadoEl.textContent = "Isso pode levar alguns segundos dependendo da quantidade de fotos. Processando...";
       btnGerar.disabled = true;
 
       const payload = {
         tema,
         textoBase,
         rascunho,
-        imagemBase64,
+        imagensBase64, // Enviando o array de imagens
         modo: "pregavel"
       };
 
@@ -601,9 +637,7 @@
           const textoExtraido = data?.textoExtraido || "";
 
           resultadoEl.textContent = esbocoFinal;
-          statusEl.textContent = textoExtraido
-            ? `Esboço gerado com sucesso pela API. Texto extraído: ${textoExtraido}`
-            : "Esboço gerado com sucesso pela API.";
+          statusEl.textContent = `Esboço gerado com sucesso! ${imagensBase64.length > 0 ? 'Páginas lidas com IA.' : ''}`;
 
           salvarHistorico({
             data: new Date().toISOString(),
@@ -631,8 +665,8 @@
       textoBaseEl.value = '';
       rascunhoEl.value = '';
       fotoEl.value = '';
-      imagemBase64 = '';
-      previewImg.src = '';
+      imagensBase64 = [];
+      previewBox.innerHTML = '';
       previewBox.style.display = 'none';
       resultadoEl.textContent = 'Seu esboço aparecerá aqui...';
       statusEl.textContent = '';
