@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EBOM 2026 - Gerador de Esboço Bíblico</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#22c55e">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root{
@@ -52,7 +60,7 @@
 
     .wrap{
       width:min(1080px, 94%);
-      margin:28px auto 34px;
+      margin:28px auto 80px; /* Margem aumentada para não cobrir o menu inferior */
       position:relative;
       z-index:1;
     }
@@ -97,7 +105,7 @@
       line-height:1.5;
     }
 
-    .hero .steps{
+    .steps{
       margin:18px auto 0;
       display:inline-flex;
       flex-wrap:wrap;
@@ -112,31 +120,6 @@
       border:1px solid rgba(255,255,255,.08);
       color:#dbeafe;
       font-size:14px;
-    }
-
-    .grid-banner{
-      margin:20px auto 0;
-      max-width:880px;
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:12px;
-    }
-
-    .mini-card{
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:18px;
-      padding:14px;
-      color:#e2e8f0;
-      font-size:14px;
-      line-height:1.45;
-    }
-
-    .mini-card strong{
-      display:block;
-      color:#4ade80;
-      font-size:14px;
-      margin-bottom:4px;
     }
 
     .card{
@@ -162,16 +145,7 @@
     }
 
     @media (max-width: 860px){
-      .grid,
-      .grid-banner{
-        grid-template-columns:1fr;
-      }
-      .hero{
-        padding:22px 14px 16px;
-      }
-      .hero .sub{
-        font-size:17px;
-      }
+      .grid{ grid-template-columns:1fr; }
     }
 
     label{
@@ -194,22 +168,7 @@
       transition:.2s ease;
     }
 
-    input[type="text"]::placeholder,
-    textarea::placeholder{
-      color:#94a3b8;
-    }
-
-    input[type="text"]:focus,
-    textarea:focus{
-      border-color:rgba(34,197,94,.45);
-      box-shadow:0 0 0 4px rgba(34,197,94,.12);
-    }
-
-    textarea{
-      min-height:220px;
-      resize:vertical;
-      line-height:1.6;
-    }
+    textarea{ min-height:200px; resize:vertical; }
 
     .upload-box{
       border:1px dashed rgba(148,163,184,.28);
@@ -218,86 +177,6 @@
       background:rgba(255,255,255,.03);
     }
 
-    input[type="file"]{
-      width:100%;
-      color:#e2e8f0;
-    }
-
-    .hint{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:9px;
-      line-height:1.5;
-    }
-
-    .actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:18px;
-    }
-
-    button{
-      border:none;
-      border-radius:16px;
-      padding:14px 18px;
-      font-size:15px;
-      font-weight:700;
-      cursor:pointer;
-      transition:.2s ease;
-    }
-
-    button:hover{
-      transform:translateY(-1px);
-    }
-
-    button:disabled{
-      opacity:.65;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .btn-primary{
-      background:linear-gradient(90deg, #22c55e, #4ade80);
-      color:#052e16;
-      box-shadow:0 0 18px rgba(34,197,94,.28);
-    }
-
-    .btn-primary:hover{
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary{
-      background:rgba(255,255,255,.08);
-      color:#f8fafc;
-      border:1px solid rgba(255,255,255,.08);
-    }
-
-    .btn-secondary:hover{
-      background:rgba(255,255,255,.12);
-    }
-
-    .btn-success{
-      background:rgba(34,197,94,.14);
-      color:#86efac;
-      border:1px solid rgba(34,197,94,.24);
-    }
-
-    .btn-whats{
-      background:rgba(14,165,233,.14);
-      color:#bae6fd;
-      border:1px solid rgba(14,165,233,.24);
-    }
-
-    .status{
-      margin-top:12px;
-      font-size:14px;
-      color:#cbd5e1;
-      min-height:20px;
-      line-height:1.5;
-    }
-
-    /* Modificado para suportar galeria de imagens */
     .preview{
       margin-top:14px;
       padding:14px;
@@ -310,12 +189,27 @@
     }
 
     .preview img{
-      width: 100px;
-      height: 140px;
+      width: 80px;
+      height: 110px;
       object-fit:cover;
       border-radius:8px;
-      border: 1px solid rgba(255,255,255,0.2);
     }
+
+    .actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+
+    button{
+      border:none;
+      border-radius:16px;
+      padding:14px 18px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .btn-primary{ background:linear-gradient(90deg, #22c55e, #4ade80); color:#052e16; }
+    .btn-secondary{ background:rgba(255,255,255,.08); color:#f8fafc; }
+    .btn-success{ background:rgba(34,197,94,.14); color:#86efac; }
+    .btn-whats{ background:rgba(14,165,233,.14); color:#bae6fd; }
 
     .result{
       white-space:pre-wrap;
@@ -323,152 +217,99 @@
       font-size:16px;
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border:1px solid var(--border-strong);
-      box-shadow:var(--glow);
       border-radius:18px;
       padding:22px;
-      min-height:160px;
       color:#f8fafc;
     }
 
-    .footer-note{
-      text-align:center;
-      color:#cbd5e1;
-      font-size:14px;
-      margin-top:14px;
-      padding:18px;
-      border-radius:18px;
-      background:rgba(8,18,38,.58);
-      border:1px solid rgba(255,255,255,.08);
-      backdrop-filter:blur(6px);
+    /* MENU INFERIOR ESTILO APP */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--card-strong);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 1000;
+      backdrop-filter: blur(15px);
     }
 
-    .verse{
-      margin-top:10px;
-      color:#86efac;
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      gap: 4px;
     }
 
-    .badge-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:14px;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size:13px;
-      border-radius:999px;
-      padding:8px 12px;
-      background:rgba(34,197,94,.1);
-      color:#bbf7d0;
-      border:1px solid rgba(34,197,94,.16);
-    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item span:first-child { font-size: 20px; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
       <div class="eyebrow">Escola Bíblica de Obreiros e Membros</div>
-      <h1>EBOM 2026<br>Gerador de Esboço Bíblico</h1>
-      <p class="sub">Cristão na era digital — transforme suas anotações em um esboço bíblico organizado, claro e pronto para ministrar.</p>
-
-      <div class="steps">
-        <div class="step">1. Escreva ou envie seu rascunho</div>
-        <div class="step">2. Clique em gerar</div>
-        <div class="step">3. Receba seu esboço pronto</div>
-      </div>
-
-      <div class="grid-banner">
-        <div class="mini-card">
-          <strong>Organize a mensagem</strong>
-          Tema, texto base, introdução, tópicos, aplicação e conclusão.
-        </div>
-        <div class="mini-card">
-          <strong>Use texto ou foto</strong>
-          Digite suas anotações ou envie fotos do seu caderno.
-        </div>
-        <div class="mini-card">
-          <strong>Compartilhe fácil</strong>
-          Copie, baixe em PDF ou envie para o WhatsApp.
-        </div>
-      </div>
+      <h1>EBOM 2026</h1>
+      <p class="sub">Transforme as suas anotações em esboços prontos para ministrar.</p>
     </div>
 
     <div class="card">
       <h2 class="card-title">Monte seu esboço</h2>
-
-      <div class="badge-row">
-        <div class="badge">📖 Estrutura bíblica</div>
-        <div class="badge">📷 Leitura de múltiplas páginas</div>
-        <div class="badge">📲 Compartilhamento rápido</div>
-      </div>
-
       <div class="grid">
         <div>
-          <label for="tema">Tema (opcional)</label>
+          <label for="tema">Tema</label>
           <input id="tema" type="text" placeholder="Ex.: A fé que persevera" />
         </div>
         <div>
-          <label for="textoBase">Texto base (opcional)</label>
+          <label for="textoBase">Texto base</label>
           <input id="textoBase" type="text" placeholder="Ex.: Hebreus 11:1" />
         </div>
       </div>
 
       <div style="margin-top:16px;">
-        <label for="rascunho">Digite ou cole seu rascunho</label>
-        <textarea id="rascunho" placeholder="Escreva aqui suas anotações, ideias, tópicos, versículos ou observações..."></textarea>
+        <label for="rascunho">Anotações</label>
+        <textarea id="rascunho" placeholder="Escreva aqui..."></textarea>
       </div>
 
       <div style="margin-top:16px;">
-        <label for="fotoRascunho">📷 Envie fotos do seu rascunho (opcional)</label>
+        <label for="fotoRascunho">📷 Envie fotos das páginas</label>
         <div class="upload-box">
           <input id="fotoRascunho" type="file" accept="image/*" multiple />
         </div>
-        <div class="hint">Dica: Selecione várias fotos de uma vez se sua anotação tiver mais de uma página.</div>
-
-        <div class="preview" id="previewBox">
-           </div>
+        <div class="preview" id="previewBox"></div>
       </div>
 
       <div class="actions">
-        <button class="btn-primary" id="btnGerar" type="button">🔥 Gerar Esboço Agora</button>
-        <button class="btn-secondary" id="btnLimpar" type="button">Limpar</button>
+        <button class="btn-primary" id="btnGerar">🔥 Gerar Esboço</button>
+        <button class="btn-secondary" id="btnLimpar">Limpar</button>
       </div>
-
-      <div class="status" id="status"></div>
+      <div class="status" id="status" style="margin-top:10px; font-size:13px; color:#cbd5e1;"></div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">Esboço gerado</h2>
-
-      <div class="result" id="resultado">Seu esboço aparecerá aqui...</div>
-
+      <h2 class="card-title">Resultado</h2>
+      <div class="result" id="resultado">O esboço aparecerá aqui...</div>
       <div class="actions">
-        <button class="btn-secondary" id="btnCopiar" type="button">Copiar texto</button>
-        <button class="btn-success" id="btnPDF" type="button">Baixar PDF</button>
-        <button class="btn-whats" type="button" onclick="enviarWhats()">📲 Enviar para WhatsApp</button>
-      </div>
-    </div>
-
-    <div class="footer-note">
-      EBOM — Escola de Obreiros e Membros
-      <div class="verse">
-        “Pregue a Palavra, esteja preparado a tempo e fora de tempo.”<br>
-        2 Timóteo 4:2
+        <button class="btn-secondary" id="btnCopiar">Copiar</button>
+        <button class="btn-success" id="btnPDF">Baixar PDF</button>
+        <button class="btn-whats" onclick="enviarWhats()">📲 WhatsApp</button>
       </div>
     </div>
   </div>
 
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active"><span>🏠</span><span>Início</span></a>
+    <a href="#rascunho" class="nav-item"><span>📝</span><span>Novo</span></a>
+    <a href="javascript:void(0)" id="btnNavPDF" class="nav-item"><span>📄</span><span>PDF</span></a>
+  </nav>
+
   <script>
-    function salvarHistorico(item) {
-      const chave = "ebom_historico_v1";
-      const atual = JSON.parse(localStorage.getItem(chave) || "[]");
-      atual.unshift(item);
-      localStorage.setItem(chave, JSON.stringify(atual.slice(0, 20)));
-    }
-    
     const temaEl = document.getElementById('tema');
     const textoBaseEl = document.getElementById('textoBase');
     const rascunhoEl = document.getElementById('rascunho');
@@ -481,10 +322,8 @@
     const statusEl = document.getElementById('status');
     const previewBox = document.getElementById('previewBox');
 
-    // Agora guardamos uma lista (array) de imagens
     let imagensBase64 = [];
 
-    // Função para comprimir a imagem no próprio navegador
     function comprimirImagem(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -494,24 +333,14 @@
           img.src = event.target.result;
           img.onload = () => {
             const canvas = document.createElement('canvas');
-            const MAX_WIDTH = 1200; // Resolução suficiente para IA ler texto
+            const MAX_WIDTH = 1200;
             const scaleSize = MAX_WIDTH / img.width;
-            
-            // Só diminui se a imagem for maior que o máximo
-            if (scaleSize < 1) {
-              canvas.width = MAX_WIDTH;
-              canvas.height = img.height * scaleSize;
-            } else {
-              canvas.width = img.width;
-              canvas.height = img.height;
-            }
-            
+            canvas.width = scaleSize < 1 ? MAX_WIDTH : img.width;
+            canvas.height = scaleSize < 1 ? img.height * scaleSize : img.height;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            // Comprime em formato JPEG com 75% de qualidade
             resolve(canvas.toDataURL('image/jpeg', 0.75));
           };
-          img.onerror = (err) => reject(err);
         };
       });
     }
@@ -519,212 +348,59 @@
     fotoEl.addEventListener('change', async (e) => {
       const files = e.target.files;
       imagensBase64 = [];
-      previewBox.innerHTML = ''; // Limpa as miniaturas anteriores
-
-      if (!files || files.length === 0) {
-        previewBox.style.display = 'none';
-        return;
-      }
-
+      previewBox.innerHTML = '';
+      if (!files.length) { previewBox.style.display = 'none'; return; }
       previewBox.style.display = 'flex';
-      statusEl.textContent = 'Otimizando imagens para envio...';
-      btnGerar.disabled = true; // Impede gerar antes de comprimir
-
-      try {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const imagemComprimida = await comprimirImagem(file);
-          imagensBase64.push(imagemComprimida);
-
-          // Cria a miniatura na tela
-          const imgEl = document.createElement('img');
-          imgEl.src = imagemComprimida;
-          previewBox.appendChild(imgEl);
-        }
-        statusEl.textContent = `${files.length} página(s) anexada(s) com sucesso.`;
-      } catch (error) {
-        statusEl.textContent = 'Erro ao processar imagens. Tente novamente.';
-        console.error(error);
-      } finally {
-        btnGerar.disabled = false;
+      statusEl.textContent = 'Otimizando fotos...';
+      for (let file of files) {
+        const imgComp = await comprimirImagem(file);
+        imagensBase64.push(imgComp);
+        const imgTag = document.createElement('img');
+        imgTag.src = imgComp;
+        previewBox.appendChild(imgTag);
       }
+      statusEl.textContent = 'Fotos prontas.';
     });
-
-    function limparTexto(texto = '') {
-      return texto.replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
-    }
-
-    function dividirTopicos(texto) {
-      const linhas = limparTexto(texto).split('\n').map(l => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
-      if (linhas.length >= 3) return linhas.slice(0, 6);
-      const frases = limparTexto(texto).split(/[.;]\s+/).map(f => f.trim()).filter(f => f.length > 10);
-      return frases.slice(0, 6);
-    }
-
-    function gerarEsbocoLocal({ tema, textoBase, rascunho, imagensBase64 }) {
-      const textoLimpo = limparTexto(rascunho);
-      const topicosBase = dividirTopicos(textoLimpo);
-      const temaFinal = tema || topicosBase[0] || 'Tema extraído das anotações';
-      const baseFinal = textoBase || 'Texto base a definir';
-      const introFonte = topicosBase[0] || textoLimpo || 'As anotações apresentadas apontam para uma mensagem relevante e atual.';
-      const aplicacaoFonte = topicosBase[topicosBase.length - 1] || 'Viver a Palavra com fidelidade, obediência e perseverança.';
-      
-      const avisoImagem = imagensBase64.length > 0 && !textoLimpo
-        ? '\nObservação: as fotos foram carregadas, mas a leitura automática falhou.\n'
-        : '';
-
-      const topicosFormatados = (topicosBase.length ? topicosBase : [
-        'A mensagem precisa nascer da Palavra.',
-        'O servo de Deus deve viver o que prega.',
-        'A prática confirma a autenticidade da fé.'
-      ]).map((item, i) => {
-        return `${i + 1}. ${item}\n   Explicação: Desenvolva este ponto com base bíblica, aplicação prática e fidelidade ao texto sagrado.`;
-      }).join('\n\n');
-
-      return `TEMA: ${temaFinal}\n\nTEXTO BASE: ${baseFinal}\n\nINTRODUÇÃO:\n${introFonte}.\nMostre o contexto do tema, a necessidade da mensagem e como ela se aplica à igreja nos dias atuais.\n\nDESENVOLVIMENTO:\n\n${topicosFormatados}\n\nAPLICAÇÃO:\n${aplicacaoFonte}\nLeve a igreja a refletir, corrigir rotas e colocar a Palavra em prática no dia a dia.\n\nCONCLUSÃO:\nRetome a verdade central da mensagem, reforce o chamado à obediência e encerre com encorajamento espiritual.\n\n${avisoImagem}ANOTAÇÕES ORIGINAIS:\n${textoLimpo || '(Nenhum texto digitado.)'}`;
-    }
-
-    async function tentarGeracaoPorAPI(payload) {
-      const resp = await fetch("/api/gerar-esboco", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const bruto = await resp.text();
-      let data = null;
-
-      try {
-        data = bruto ? JSON.parse(bruto) : null;
-      } catch {
-        throw new Error("A API respondeu em formato inválido.");
-      }
-
-      if (!resp.ok) {
-        throw new Error(data?.error || "Erro ao gerar esboço.");
-      }
-
-      return data;
-    }
 
     btnGerar.addEventListener("click", async () => {
-      const tema = temaEl.value.trim();
-      const textoBase = textoBaseEl.value.trim();
-      const rascunho = rascunhoEl.value.trim();
-
-      if (!rascunho && imagensBase64.length === 0) {
-        statusEl.textContent = "Digite um rascunho ou envie fotos antes de gerar o esboço.";
+      if (!rascunhoEl.value.trim() && !imagensBase64.length) {
+        statusEl.textContent = "Adicione texto ou fotos primeiro.";
         return;
       }
-
-      statusEl.textContent = "Lendo anotações e gerando esboço...";
-      resultadoEl.textContent = "Isso pode levar alguns segundos dependendo da quantidade de fotos. Processando...";
+      statusEl.textContent = "Gerando...";
       btnGerar.disabled = true;
-
-      const payload = {
-        tema,
-        textoBase,
-        rascunho,
-        imagensBase64, // Enviando o array de imagens
-        modo: "pregavel"
-      };
-
       try {
-        try {
-          const data = await tentarGeracaoPorAPI(payload);
-
-          const esbocoFinal = data?.esboco || "Nenhum esboço retornado.";
-          const textoExtraido = data?.textoExtraido || "";
-
-          resultadoEl.textContent = esbocoFinal;
-          statusEl.textContent = `Esboço gerado com sucesso! ${imagensBase64.length > 0 ? 'Páginas lidas com IA.' : ''}`;
-
-          salvarHistorico({
-            data: new Date().toISOString(),
-            tema,
-            textoBase,
-            rascunho,
-            textoExtraido,
-            esboco: esbocoFinal
-          });
-        } catch (apiError) {
-          const esbocoLocal = gerarEsbocoLocal(payload);
-          resultadoEl.textContent = esbocoLocal;
-          statusEl.textContent = `${apiError.message} Foi usada a geração local do site.`;
-        }
+        const resp = await fetch("/api/gerar-esboco", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tema: temaEl.value, textoBase: textoBaseEl.value, rascunho: rascunhoEl.value, imagensBase64 })
+        });
+        const data = await resp.json();
+        resultadoEl.textContent = data.esboco;
+        statusEl.textContent = "Esboço pronto!";
       } catch (err) {
-        resultadoEl.textContent = "Não foi possível gerar o esboço agora.";
-        statusEl.textContent = err.message || "Erro inesperado.";
-      } finally {
-        btnGerar.disabled = false;
-      }
+        statusEl.textContent = "Erro ao gerar.";
+      } finally { btnGerar.disabled = false; }
     });
 
-    btnLimpar.addEventListener('click', () => {
-      temaEl.value = '';
-      textoBaseEl.value = '';
-      rascunhoEl.value = '';
-      fotoEl.value = '';
-      imagensBase64 = [];
-      previewBox.innerHTML = '';
-      previewBox.style.display = 'none';
-      resultadoEl.textContent = 'Seu esboço aparecerá aqui...';
-      statusEl.textContent = '';
-    });
+    btnLimpar.onclick = () => { location.reload(); };
+    btnCopiar.onclick = () => { navigator.clipboard.writeText(resultadoEl.textContent); statusEl.textContent = "Copiado!"; };
 
-    btnCopiar.addEventListener('click', async () => {
-      const texto = resultadoEl.textContent.trim();
-      if (!texto || texto === 'Seu esboço aparecerá aqui...') return;
-
-      try {
-        await navigator.clipboard.writeText(texto);
-        statusEl.textContent = 'Esboço copiado.';
-      } catch {
-        statusEl.textContent = 'Não foi possível copiar automaticamente.';
-      }
-    });
-
-    btnPDF.addEventListener('click', () => {
-      const texto = resultadoEl.textContent.trim();
-      if (!texto || texto === 'Seu esboço aparecerá aqui...') {
-        statusEl.textContent = 'Gere um esboço antes de baixar o PDF.';
-        return;
-      }
-
+    function gerarPDF() {
+      const texto = resultadoEl.textContent;
+      if (texto.includes('aparecerá aqui')) return;
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-      const margem = 15;
-      const largura = 180;
-      const pageHeight = doc.internal.pageSize.height;
-      let y = 20;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('EBOM - Esboço Bíblico', margem, y);
-      y += 10;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      
-      const linhas = doc.splitTextToSize(texto, largura);
-      
-      for (let i = 0; i < linhas.length; i++) {
-        if (y > pageHeight - 20) {
-          doc.addPage();
-          y = 20;
-        }
-        doc.text(linhas[i], margem, y);
-        y += 6; 
-      }
-
+      const doc = new jsPDF();
+      const linhas = doc.splitTextToSize(texto, 180);
+      doc.text(linhas, 15, 20);
       doc.save('esboco-ebom.pdf');
-      statusEl.textContent = 'PDF baixado.';
-    });
+    }
+
+    btnPDF.onclick = gerarPDF;
+    document.getElementById('btnNavPDF').onclick = gerarPDF;
 
     function enviarWhats(){
-      const texto = resultadoEl.textContent.trim();
-      if(!texto || texto.includes('Seu esboço')) return;
-      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+      window.open(`https://wa.me/?text=${encodeURIComponent(resultadoEl.textContent)}`, '_blank');
     }
   </script>
 </body>
